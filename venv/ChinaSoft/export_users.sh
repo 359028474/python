@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+# $1 源文件 $2 number $3 目标文件
 if [ $2 -ge 999999 ]
 then
   sleep 15
