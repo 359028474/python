@@ -17,7 +17,7 @@ class BZK_customers_of_level1_DQ(object):
     def tdm_BZK_customers_of_level1dq(self,planname,taskname,the_lasted_date):
         '''
         ---------------------------------------
-        @名称 --%@NAME: __function__
+        @名称 --%@NAME: tdm_BZK_customers_of_level1dq
         @功能描述 --%@COMMENT: 一级电渠订购宝藏卡客户(订购号码 6月至今)
         @执行周期 --%@PERIOD: 日
         @参数 --%@PARAM: the_lasted_date eg:'20191115'
@@ -51,16 +51,29 @@ class BZK_customers_of_level1_DQ(object):
             sql_1 = '''set hive.exec.reducers.max=true'''
             hd.execute(sql_1)
 
-            # 2019年6月起,一经在网的
+            # 2019年6月起至今,一经在网的宝藏卡客户
             sql_1 = '''
                 INSERT INTO TABLE DM.TDM_IOP_LABEL_BZK_CUSTOMERS_OF_LEVEL1_DQ_D PARTITION(STATIS_DATE=%(STATIS_DATE)S)
-                SELECT TB.BUY_SERV_NUM
+                SELECT '01',TB.BUY_SERV_NUM,'Y'
                 FROM ODS_VAS.TODS_BUSI_ORDER_HISTORY_D TB
                 JOIN ODS_VAS.TODS_SUPER_BASS_USER_INFO_FIG_D TS
                 ON TB.BUY_SERV_NUM = TS.SERV_NUM
-                WHERE  TS.USER_STAT LIKE "1%" AND TB.BUY_STATE="8" AND SUBSTR(STATIS_DATE,1,6)  BETWEEN "20190601" AND %(STATIS_DATE)S
+                WHERE  TS.USER_STAT LIKE "1%" AND TB.BUY_STATE="8" AND STATIS_DATE  >= "20190601" AND STATIS_DATE <= %(STATIS_DATE)S
             ''' % { STATIS_DATE:the_lasted_date }
             hd.execute(sql_1)
+
+            # 2019年6月起至今,一经在网的一级电渠宝藏卡客户
+            sql_2= '''
+                INSERT INTO TABLE DM.TDM_IOP_LABEL_BZK_CUSTOMERS_OF_LEVEL1_DQ_D PARTITION(STATIS_DATE=%(STATIS_DATE)S)
+                SELECT '02',TB.BUY_SERV_NUM,'Y'
+                FROM ODS_VAS.TODS_BUSI_ORDER_HISTORY_D TB
+                JOIN ODS_VAS.TODS_SUPER_BASS_USER_INFO_FIG_D TS
+                ON TB.BUY_SERV_NUM = TS.SERV_NUM
+                JOIN DIM.TD_PLAT_DFT_TB_RWK_CHN_DATA_D TP
+                ON TB.CHANNE_ID = TP.CHN_ID
+                WHERE  TS.USER_STAT LIKE "1%" AND TB.BUY_STATE="8" AND TP.CHN_CODE='JY11010000' AND STATIS_DATE  >= "20190601" AND STATIS_DATE <= %(STATIS_DATE)S
+            '''
+            hd.execute(sql_2)
 
         except Exception as e:
             flag = 1
