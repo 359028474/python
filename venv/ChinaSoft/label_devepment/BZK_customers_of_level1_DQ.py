@@ -57,7 +57,7 @@ class BZK_customers_of_level1_DQ(object):
             # 2019年6月起至今,一经在网的宝藏卡客户
             sql = 'sql_1'
             sql_1 = '''
-                insert into table dm.tdm_iop_label_bzk_customers_of_level1_dq_d partition(statis_date=%(statis_date)s)
+                insert into table dm.tdm_iop_bzk_customer_label_d partition(statis_date=%(statis_date)s)
                 select '01',tb.buy_serv_num,'y'
                 from ods_vas.tods_busi_order_history_d tb
                 join ods_vas.tods_super_bass_user_info_fig_d ts
@@ -70,7 +70,7 @@ class BZK_customers_of_level1_DQ(object):
             # 2019年6月起至今,一经在网的一级电渠宝藏卡客户
             sql = 'sql_2'
             sql_2= '''
-                insert into table dm.tdm_iop_label_bzk_customers_of_level1_dq_d partition(statis_date=%(statis_date)s)
+                insert into table dm.tdm_iop_bzk_customer_label_d partition(statis_date=%(statis_date)s)
                 select '02',tb.buy_serv_num,'y'
                 from ods_vas.tods_busi_order_history_d tb
                 join ods_vas.tods_super_bass_user_info_fig_d ts
