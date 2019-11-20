@@ -1,8 +1,9 @@
 # coding=utf-8
+
 import sys
-# from common.dbtool.ACDao import HiveDB
-# from common.utils.Log import Log
-# from common.utils.util import days
+from common.dbtool.ACDao import HiveDB
+from common.utils.Log import Log
+from common.utils.util import days
 
 class BZK_customers_of_level1_DQ(object):
     '''
@@ -14,7 +15,7 @@ class BZK_customers_of_level1_DQ(object):
     @修改记录 --%@MODIFY:
     ---------------------------------------
     '''
-    def tdm_BZK_customers_of_level1dq(self,planname,taskname,the_lasted_date):
+    def tdm_BZK_customers_of_level1dq(self,planname,taskname,statis_date):
         '''
         ---------------------------------------
         @名称 --%@NAME: tdm_BZK_customers_of_level1dq
@@ -28,15 +29,17 @@ class BZK_customers_of_level1_DQ(object):
         @目标表 --%@TO:
         ---------------------------------------
         '''
-        statis_month = str(the_lasted_date)[0,6]
         try:
             hd = HiveDB()
             flag = 0
+            file = open('/home/vas/vgop_py/iop_label/the_latest_date.txt')
+            the_lasted_date = file.readline()
+            file.close()
 
             # 判断是否有分区
             sql_1 = '''
-            alter table DM.TDM_IOP_LABEL_BZK_CUSTOMERS_OF_LEVEL1_DQ_D drop if exists partition(STATIS_DATE=%(STATIS_DATE)S)
-            '''% { STATIS_DATE:the_lasted_date }
+            alter table dm.tdm_iop_label_bzk_customers_of_level1_dq_d drop if exists partition(statis_date=%(statis_date)s)
+            '''% { 'STATIS_DATE':statis_date }
             hd.execute(sql_1)
 
             # 配置MR任务开启并行执行
@@ -48,37 +51,44 @@ class BZK_customers_of_level1_DQ(object):
             hd.execute(sql_1)
 
             # 设置reduce任务个数的最大值
-            sql_1 = '''set hive.exec.reducers.max=true'''
+            sql_1 = '''set hive.exec.reducers.max=300'''
             hd.execute(sql_1)
 
             # 2019年6月起至今,一经在网的宝藏卡客户
+            sql = 'sql_1'
             sql_1 = '''
-                INSERT INTO TABLE DM.TDM_IOP_LABEL_BZK_CUSTOMERS_OF_LEVEL1_DQ_D PARTITION(STATIS_DATE=%(STATIS_DATE)S)
-                SELECT '01',TB.BUY_SERV_NUM,'Y'
-                FROM ODS_VAS.TODS_BUSI_ORDER_HISTORY_D TB
-                JOIN ODS_VAS.TODS_SUPER_BASS_USER_INFO_FIG_D TS
-                ON TB.BUY_SERV_NUM = TS.SERV_NUM
-                WHERE  TS.USER_STAT LIKE "1%" AND TB.BUY_STATE="8" AND STATIS_DATE  >= "20190601" AND STATIS_DATE <= %(STATIS_DATE)S
-            ''' % { STATIS_DATE:the_lasted_date }
+                insert into table dm.tdm_iop_label_bzk_customers_of_level1_dq_d partition(statis_date=%(statis_date)s)
+                select '01',tb.buy_serv_num,'y'
+                from ods_vas.tods_busi_order_history_d tb
+                join ods_vas.tods_super_bass_user_info_fig_d ts
+                on tb.buy_serv_num = ts.serv_num
+                where  ts.user_stat like "1%" and tb.buy_state="8" and tb.statis_date  >= "20190601" and tb.statis_date <= %(statis_date)s 
+                and ts.statis_date =  %(the_lasted_date)s
+            ''' % { 'statis_date':statis_date,'the_lasted_date':the_lasted_date}
             hd.execute(sql_1)
 
             # 2019年6月起至今,一经在网的一级电渠宝藏卡客户
+            sql = 'sql_2'
             sql_2= '''
-                INSERT INTO TABLE DM.TDM_IOP_LABEL_BZK_CUSTOMERS_OF_LEVEL1_DQ_D PARTITION(STATIS_DATE=%(STATIS_DATE)S)
-                SELECT '02',TB.BUY_SERV_NUM,'Y'
-                FROM ODS_VAS.TODS_BUSI_ORDER_HISTORY_D TB
-                JOIN ODS_VAS.TODS_SUPER_BASS_USER_INFO_FIG_D TS
-                ON TB.BUY_SERV_NUM = TS.SERV_NUM
-                JOIN DIM.TD_PLAT_DFT_TB_RWK_CHN_DATA_D TP
-                ON TB.CHANNE_ID = TP.CHN_ID
-                WHERE  TS.USER_STAT LIKE "1%" AND TB.BUY_STATE="8" AND TP.CHN_CODE='JY11010000' AND STATIS_DATE  >= "20190601" AND STATIS_DATE <= %(STATIS_DATE)S
-            '''
+                insert into table dm.tdm_iop_label_bzk_customers_of_level1_dq_d partition(statis_date=%(statis_date)s)
+                select '02',tb.buy_serv_num,'y'
+                from ods_vas.tods_busi_order_history_d tb
+                join ods_vas.tods_super_bass_user_info_fig_d ts
+                on tb.buy_serv_num = ts.serv_num
+                join dim.td_plat_dft_tb_rwk_chn_data_d tp
+                on tb.channe_id = tp.chn_id
+                where  ts.user_stat like "1%" and tb.buy_state="8" and tp.chn_code='jy11010000' and tb.statis_date  >= "20190601" and tb.statis_date <= %(statis_date)s 
+                and ts.statis_date =  %(the_lasted_date)s                               
+            ''' % { 'statis_date':statis_date,'the_lasted_date':the_lasted_date}
+
             hd.execute(sql_2)
+            hd.close
+            return flag
 
         except Exception as e:
             flag = 1
             # 参数说明
-            Log().do_log(planname,taskname,sys.argv[0].replace('\\','\\\\'),statis_month,e,sql,hd)
+            Log().do_log(planname,taskname,sys.argv[0].replace('\\','\\\\'),statis_date,e,sql,hd)
             hd.close()
             return flag
 
