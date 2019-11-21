@@ -7,13 +7,10 @@ class Tdm_IOP_Label_Bzk_Customers(object):
     '''
     ---------------------------------------
     @名称 --%@NAME: Tdm_IOP_Lbael_Bzk_Customers
-    @功能名称 --%@COMMENT:
-    @执行参数 --%@PERIOD:
+    @功能描述 --%@COMMENT:
     @创建人 --%@CREATEOR: ZhangJian
-    @创建时间 --%@CREATED_TIME: 2019/11/20
+    @备注 --%@REMARK:
     @修改记录 --%@MODIFY:
-    @来源表 --%@FROM:
-    @目标表 --%@TO:
     ---------------------------------------
     '''
 
