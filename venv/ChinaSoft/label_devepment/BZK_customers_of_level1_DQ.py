@@ -77,7 +77,7 @@ class BZK_customers_of_level1_DQ(object):
                 on tb.buy_serv_num = ts.serv_num
                 join dim.td_plat_dft_tb_rwk_chn_data_d tp
                 on tb.channe_id = tp.chn_id
-                where  ts.user_stat like "1%" and tb.buy_state="8" and tp.chn_code='jy11010000' and tb.statis_date  >= "20190601" and tb.statis_date <= %(statis_date)s 
+                where  ts.user_stat like "1%%" and tb.buy_state="8" and tp.chn_code='jy11010000' and tb.statis_date  >= "20190601" and tb.statis_date <= %(statis_date)s 
                 and ts.statis_date =  %(the_lasted_date)s                               
             ''' % { 'statis_date':statis_date,'the_lasted_date':the_lasted_date}
 
