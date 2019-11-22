@@ -62,7 +62,7 @@ class BZK_customers_of_level1_DQ(object):
                 from ods_vas.tods_busi_order_history_d tb
                 join ods_vas.tods_super_bass_user_info_fig_d ts
                 on tb.buy_serv_num = ts.serv_num
-                where  ts.user_stat like "1%" and tb.buy_state="8" and tb.statis_date  >= "20190601" and tb.statis_date <= %(statis_date)s 
+                where  ts.user_stat like "1%%" and tb.buy_state="8" and tb.statis_date  >= "20190601" and tb.statis_date <= %(statis_date)s 
                 and ts.statis_date =  %(the_lasted_date)s
             ''' % { 'statis_date':statis_date,'the_lasted_date':the_lasted_date}
             hd.execute(sql_1)
